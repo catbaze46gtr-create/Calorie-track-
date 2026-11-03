@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#02030a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><title>Calorie Scan</title>
+<style>
+:root{--bg:#eef2fb;--card:#fff;--ink:#0a1430;--mute:#5b6784;--line:#dbe3f5;--red:#e5243b;--blue:#2f6bff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#05070d;--card:#0c1428;--ink:#eef3ff;--mute:#8fa0c4;--line:#1c2a4d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#05070d;--card:#0c1428;--ink:#eef3ff;--mute:#8fa0c4;--line:#1c2a4d;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.hero{padding:22px 18px 18px;color:#fff;background:radial-gradient(120% 150% at 100% 0,#1d4fd8,transparent 55%),linear-gradient(135deg,#05070d,#0b1b3a);border-bottom:3px solid var(--red)}
+.kick{font-size:11px;letter-spacing:2px;color:#9db8ff}
+.hero h1{margin:4px 0;font-size:34px;font-weight:900;letter-spacing:1px}.hero h1 b{color:var(--red)}
+.hero p{margin:0;color:#cfe0ff}
+.tabs{display:flex;gap:6px;padding:12px 12px 0;max-width:560px;margin:0 auto}
+.tabs button{flex:1;padding:11px 4px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:700 14px system-ui,sans-serif;cursor:pointer}
+.tabs .on{background:linear-gradient(135deg,var(--red),#b3122a);border-color:transparent;color:#fff}
+main{max-width:560px;margin:0 auto;padding:12px 12px 32px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.card h2{margin:0 0 10px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue)}
+.mute{color:var(--mute);font-size:14px}
+.big{font-size:40px;font-weight:900;line-height:1.1}.big small{font-size:15px;font-weight:500;color:var(--mute)}
+.bar{height:12px;border-radius:8px;background:var(--line);overflow:hidden;margin:12px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1a3fb0,var(--blue));transition:width .4s}
+.macros,.g2,.g3{display:grid;gap:8px}.macros,.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+.macros div,.tile{background:var(--bg);border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;color:var(--mute);border-top:3px solid var(--blue)}
+.macros div:nth-child(2){border-top-color:#16306b}.macros div:nth-child(3),.tile.r{border-top-color:var(--red)}
+.macros b,.tile b{display:block;font-size:22px;color:var(--ink)}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--red),#b3122a);color:#fff;font:800 17px system-ui,sans-serif;text-align:center;cursor:pointer;margin-bottom:10px}
+.btn.blue{background:linear-gradient(135deg,var(--blue),#1a3fb0)}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled,.btn.off{opacity:.45;pointer-events:none}
+label.f{display:block;font-size:12px;color:var(--mute)}
+input[type=text],input[type=number],select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:4px}
+.add{display:flex;gap:8px;margin-bottom:10px}.add .btn{width:auto;margin:0;padding:10px 14px;font-size:15px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}.row span:first-child{flex:1}
+.x,.lnk{background:none;border:0;color:var(--mute);cursor:pointer;font:inherit}.x{font-size:22px}.lnk{color:var(--blue);font-weight:700}
+.acts{display:flex;gap:8px}.acts .btn{margin:0}
+.gauge{position:relative;height:12px;border-radius:8px;margin:16px 0 8px;background:linear-gradient(90deg,#2f6bff 14%,#19c37d 14% 40%,#f5a524 40% 60%,#e5243b 60%)}
+.mark{position:absolute;top:-5px;left:-10%;width:4px;height:22px;border-radius:2px;background:var(--ink);transition:left .4s}
+.chip{display:inline-block;padding:4px 12px;border-radius:20px;background:var(--red);color:#fff;font-weight:700;font-size:13px}
+[hidden]{display:none!important}
+.days{display:flex;gap:6px;margin-bottom:12px}.days button{flex:1;padding:9px 2px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:700 13px system-ui,sans-serif;cursor:pointer}.days .on{background:var(--blue);border-color:transparent;color:#fff}
+.favs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.chipb{border:1px solid var(--line);border-radius:20px;background:var(--bg);color:var(--ink);padding:8px 12px;font:600 14px system-ui,sans-serif;cursor:pointer}
+.pbar{height:8px;margin:12px 0 4px}.pbar i{background:linear-gradient(90deg,#b3122a,#ff4d62)}
+:root{--bg:#f2f5fb;--card:#fff;--ink:#1f2a44;--mute:#6b7690;--line:#e7ebf4;--red:#e07a86;--blue:#6283d8;--sh:0 8px 28px rgba(35,52,98,.09)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1526;--card:#171f36;--ink:#e9eefa;--mute:#94a1c2;--line:#242e4c;--sh:0 8px 28px rgba(0,0,0,.28)}}
+:root[data-theme="dark"]{--bg:#0f1526;--card:#171f36;--ink:#e9eefa;--mute:#94a1c2;--line:#242e4c;--sh:0 8px 28px rgba(0,0,0,.28)}
+.hero{padding:26px 20px 30px;border:0;border-radius:0 0 32px 32px;background:radial-gradient(110% 140% at 100% 0,rgba(224,122,134,.3),transparent 55%),linear-gradient(145deg,#1d2a4f,#35497f);box-shadow:0 10px 30px rgba(30,43,80,.18)}
+.hero h1{font-size:30px;font-weight:800;letter-spacing:.5px}.hero h1 b{color:#f2a9b2}.kick{color:#b8c8f2}.hero p{color:#dbe5fb}
+main{padding-top:20px}
+.card{border:0;border-radius:26px;padding:18px;box-shadow:var(--sh)}
+.card h2{font-weight:700;letter-spacing:1.2px;color:var(--blue)}
+.big{font-weight:800}
+.bar{height:10px;border-radius:10px}.bar i{border-radius:10px;background:linear-gradient(90deg,#8aa3ea,#6283d8)}.pbar i{background:linear-gradient(90deg,#eca6ae,#e07a86)}
+.macros div,.tile{border-radius:18px;border-top:3px solid #a9bcf0}.macros div:nth-child(2){border-top-color:#c3cbe6}.macros div:nth-child(3),.tile.r{border-top-color:#f0b3ba}
+.btn{border-radius:20px;font-weight:700;background:linear-gradient(135deg,#7894e2,#5f7fd3);box-shadow:0 6px 16px rgba(95,127,211,.25)}
+.btn.blue{background:linear-gradient(135deg,#5c70a8,#465a92)}
+.btn.alt{background:var(--bg);color:var(--ink);border:0;box-shadow:none}
+.btn:disabled,.btn.off{box-shadow:none}
+.fp{position:relative;overflow:hidden}.fp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+input[type=text],input[type=number],select{border-radius:16px;border:1px solid var(--line);padding:11px 12px}
+.days button{border:0;border-radius:16px;background:var(--bg)}.days .on{background:#6283d8;color:#fff}
+.chip{background:rgba(98,131,216,.16);color:var(--blue)}
+.gauge{height:12px;border-radius:12px;background:linear-gradient(90deg,#8fa8e6 14%,#86cfa9 14% 40%,#f2c88a 40% 60%,#eaa0a8 60%)}
+.chipb{border:0;border-radius:22px;background:var(--bg)}
+.acc{margin-bottom:14px}
+.acch{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:0;border-radius:24px;background:var(--card);color:var(--ink);box-shadow:var(--sh);font:inherit;text-align:left;cursor:pointer}
+.acch .ico{display:grid;place-items:center;width:44px;height:44px;border-radius:16px;background:var(--bg);font-size:22px}
+.acch .t{flex:1;min-width:0}.acch b{display:block;font-size:17px}.acch small{color:var(--mute);font-size:13px}
+.acch .chev{color:var(--mute);font-size:18px;transition:transform .25s}
+.acch.open{background:linear-gradient(135deg,#6786d6,#4d68b4);color:#fff}.acch.open small,.acch.open .chev{color:#e3ebff}.acch.open .ico{background:rgba(255,255,255,.18)}.acch.open .chev{transform:rotate(180deg)}
+.acc .tab{padding-top:12px}
+#bst,#status:not(:empty){background:var(--bg);border-radius:14px;padding:10px 12px;color:var(--ink)}
+
+:root{--card:rgba(255,255,255,.84)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--card:rgba(23,31,54,.8)}}
+:root[data-theme="dark"]{--card:rgba(23,31,54,.8)}
+.card,.acch{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+html::after,body::before,body::after{content:"";position:fixed;pointer-events:none;z-index:-1;will-change:transform}
+body::before{top:0;bottom:0;left:0;width:300vw;background:linear-gradient(90deg,#d5ecf6 0%,#bfe0ee 17%,#9fd2e6 33%,#f4e6cd 50%,#f9d7c0 67%,#bfe0ee 83%,#d5ecf6 100%);animation:tide 70s ease-in-out infinite alternate}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body::before{background:linear-gradient(90deg,#0b1730 0%,#12305a 17%,#17406b 33%,#2a2a48 50%,#3a2a45 67%,#12305a 83%,#0b1730 100%)}:root:not([data-theme="light"]) body::after,:root:not([data-theme="light"])::after{opacity:.4}}
+:root[data-theme="dark"] body::before{background:linear-gradient(90deg,#0b1730 0%,#12305a 17%,#17406b 33%,#2a2a48 50%,#3a2a45 67%,#12305a 83%,#0b1730 100%)}
+body::after,html::after{left:0;bottom:0;background-repeat:repeat-x}
+body::after{width:calc(100% + 1200px);height:120px;background-size:1200px 120px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60C200 20 400 100 600 60S1000 100 1200 60V120H0Z' fill='white' fill-opacity='.5'/%3E%3C/svg%3E");animation:drift 32s linear infinite}
+html::after{width:calc(100% + 800px);height:90px;background-size:800px 90px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 90' preserveAspectRatio='none'%3E%3Cpath d='M0 45C133 15 267 75 400 45S667 75 800 45V90H0Z' fill='white' fill-opacity='.32'/%3E%3C/svg%3E");animation:drift2 22s linear infinite reverse}
+@keyframes tide{to{transform:translateX(-200vw)}}
+@keyframes drift{to{transform:translateX(-1200px)}}
+@keyframes drift2{to{transform:translateX(-800px)}}
+@keyframes rise{from{opacity:0;transform:translateY(18px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes lift{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.5) rotate(-8deg)}60%{opacity:1;transform:scale(1.14)}100%{opacity:1;transform:none}}
+@keyframes glow{0%,100%{text-shadow:0 0 0 rgba(242,169,178,0)}50%{text-shadow:0 0 18px rgba(242,169,178,.75)}}
+.kick{animation:rise .7s .05s both}.hero h1{animation:rise .8s .15s both}.hero p{animation:rise .8s .3s both}
+.hero h1 b{display:inline-block;animation:pop .9s .55s both,glow 3.6s 1.6s ease-in-out infinite}
+.tab>*{animation:lift .5s both}.tab>*:nth-child(2){animation-delay:.06s}.tab>*:nth-child(3){animation-delay:.12s}.tab>*:nth-child(4){animation-delay:.18s}.tab>*:nth-child(n+5){animation-delay:.24s}
+.btn,.cd,.chipb,.days button,.acch{transition:transform .12s}.btn:active,.cd:active,.chipb:active,.days button:active,.acch:active{transform:scale(.97)}
+.macros div:nth-child(4){border-top-color:#f2c88a}.macros div:nth-child(5){border-top-color:#86cfa9}
+.cnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.cnav b{font-size:17px}.cnav .x{font-size:28px;padding:0 14px}
+.cwk,.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.cwk span{font-size:11px;color:var(--mute);padding-bottom:4px}
+.cd{position:relative;aspect-ratio:1;border:0;border-radius:14px;background:transparent;color:var(--ink);font:600 14px system-ui,sans-serif;cursor:pointer}
+.cd.has::after,.cd.wt::before{content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%}
+.cd.has::after{left:calc(50% + 1px);background:var(--red)}.cd.wt::before{left:calc(50% - 6px);background:var(--blue)}
+.cd.today{box-shadow:inset 0 0 0 2px var(--blue)}.cd.sel{background:var(--blue);color:#fff}.cd.sel::after,.cd.sel::before{background:#fff}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+:root:root:root{--bg:#050810;--card:rgba(7,13,29,.74);--ink:#e8f4ff;--mute:#8fa9c4;--line:rgba(110,190,255,.17);--blue:#47c9f5;--red:#ffab4a;--sh:0 0 0 1px rgba(110,190,255,.1),0 10px 40px rgba(0,0,0,.55);color-scheme:dark}
+html{background:#02030a}body{background:transparent}
+body::before,body::after,html::after{display:none}
+#bh{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:block;background:#02030a}
+body.nogl #bh{display:none}
+body.nogl{background:radial-gradient(circle at 50% 150px,#000 0 92px,#ffd08a 94px 98px,rgba(255,150,60,.4) 108px,rgba(255,120,40,.12) 170px,transparent 250px),#02030a}
+.card,.acch{-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line)}
+input[type=password]{width:100%;font:inherit;color:var(--ink);border-radius:16px;padding:11px 12px;margin-top:4px;box-sizing:border-box}
+.hero{min-height:330px;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 20px 22px;border:0;border-radius:0;box-shadow:none;background:linear-gradient(180deg,rgba(2,3,10,0) 45%,rgba(2,3,10,.8) 100%)}
+.kick{color:#6fd3ff;letter-spacing:.34em;font-size:10px}
+.hero h1{font-weight:300;font-size:28px;letter-spacing:.2em;text-shadow:0 0 22px rgba(71,201,245,.5)}
+.hero h1 b{color:#ffb454;font-weight:700}
+.hero p{color:#b9d4ea}
+@keyframes glow{0%,100%{text-shadow:0 0 0 rgba(255,171,74,0)}50%{text-shadow:0 0 22px rgba(255,171,74,.9)}}
+.card{border-radius:22px;box-shadow:var(--sh)}
+.card h2{color:#47c9f5;letter-spacing:.22em;font-size:11px}
+.big{font-weight:300;font-variant-numeric:tabular-nums}
+.acch{border-radius:20px}
+.acch .ico{background:rgba(110,190,255,.1)}
+.acch.open{background:linear-gradient(135deg,rgba(40,140,200,.8),rgba(18,60,125,.8));box-shadow:0 0 26px rgba(71,201,245,.28)}
+.bar{background:rgba(110,190,255,.12)}.bar i{background:linear-gradient(90deg,#1b8fd0,#47c9f5);box-shadow:0 0 12px rgba(71,201,245,.6)}.pbar i{background:linear-gradient(90deg,#ff7a2f,#ffb454);box-shadow:0 0 12px rgba(255,171,74,.6)}
+.macros div,.tile{background:rgba(110,190,255,.07);border-top:2px solid #47c9f5}
+.macros div:nth-child(2){border-top-color:#7aa9ff}.macros div:nth-child(3),.tile.r{border-top-color:#ffab4a}.macros div:nth-child(4){border-top-color:#ffd38a}.macros div:nth-child(5){border-top-color:#6ee7b7}
+.btn{background:linear-gradient(135deg,#1fa5d8,#1666b0);color:#fff;box-shadow:0 0 18px rgba(71,201,245,.35);letter-spacing:.04em}
+.btn.blue{background:linear-gradient(135deg,#ffb454,#e8782a);color:#1a0f03;box-shadow:0 0 18px rgba(255,171,74,.35)}
+.btn.alt{background:rgba(110,190,255,.08);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
+input[type=text],input[type=number],input[type=password],select{background:rgba(4,9,22,.75);color:var(--ink);border:1px solid var(--line)}
+.days button,.chipb{background:rgba(110,190,255,.07);color:var(--ink);border:1px solid var(--line)}
+.days .on{background:#1fa5d8;color:#fff;border-color:transparent;box-shadow:0 0 14px rgba(71,201,245,.4)}
+.chip{background:rgba(71,201,245,.15);color:#47c9f5}
+.cd.sel{background:#1fa5d8;box-shadow:0 0 14px rgba(71,201,245,.5)}.cd.today{box-shadow:inset 0 0 0 2px #ffab4a}.cd.sel.today{box-shadow:inset 0 0 0 2px #ffab4a,0 0 14px rgba(71,201,245,.5)}
+.row{border-top-color:var(--line)}.lnk{color:#47c9f5}
+#bst,#status:not(:empty){background:rgba(110,190,255,.08)}
+
+html{background:#02030a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='520'%3E%3Cg fill='white'%3E%3Ccircle cx='30' cy='60' r='.8' opacity='.7'/%3E%3Ccircle cx='140' cy='20' r='.6' opacity='.5'/%3E%3Ccircle cx='260' cy='90' r='1' opacity='.6'/%3E%3Ccircle cx='330' cy='170' r='.7' opacity='.5'/%3E%3Ccircle cx='70' cy='210' r='.9' opacity='.6'/%3E%3Ccircle cx='200' cy='260' r='.6' opacity='.45'/%3E%3Ccircle cx='310' cy='340' r='.8' opacity='.6'/%3E%3Ccircle cx='110' cy='400' r='1' opacity='.55'/%3E%3Ccircle cx='230' cy='470' r='.7' opacity='.5'/%3E%3Ccircle cx='20' cy='480' r='.6' opacity='.45'/%3E%3C/g%3E%3C/svg%3E")}
+#bh{opacity:0;transition:opacity 1.2s}#bh.on{opacity:1}
+#bh.roi{bottom:auto;-webkit-mask-image:linear-gradient(#000 88%,transparent);mask-image:linear-gradient(#000 88%,transparent)}
+</style>
+</head>
+<body><canvas id="bh" aria-hidden="true"></canvas>
+<header class="hero"><div class="kick">YOUR PERSONAL FUEL TRACKER</div><h1>CALORIE <b>SCAN</b></h1><p>Scan it. Track it. Own it. <span id="day"></span></p></header>
+
+<main>
+<div class="acc"><button class="acch open" data-t="today" aria-expanded="true"><span class="ico">🔥</span><span class="t"><b>Today</b><small id="s-today">Meals and calories</small></span><span class="chev">▾</span></button><div class="tab" id="t-today">
+  <section class="card">
+    <h2>Today’s fuel</h2><div class="days"><button data-d="train">🏋️ Training +8%</button><button data-d="work">🚗 Work</button><button data-d="rest">😴 Rest −8%</button></div>
+    <div class="big"><span id="eaten">0</span> <small>/ <span id="goalv">2000</span> kcal goal · <button class="lnk" id="goalEdit">edit</button></small></div>
+    <div class="bar"><i id="fill"></i></div>
+    <div class="macros"><div><b id="p">0</b>protein g</div><div><b id="c">0</b>carbs g</div><div><b id="f">0</b>fat g</div><div><b id="sg">0</b>sugar g</div><div><b id="fb">0</b>fiber g</div></div><div class="bar pbar"><i id="pfill"></i></div><div class="mute" id="ptxt"></div>
+  </section>
+  <div class="g2"><label class="btn scan fp">📷 Scan a meal<input class="ai" id="file" type="file" accept="image/*" capture="environment"></label><label class="btn blue scan fp">🖼️ From gallery<input class="ai" id="gfile" type="file" accept="image/*"></label></div>
+  <div class="add"><input id="txt" type="text" placeholder="Or type it: 2 eggs and rice"><button class="btn blue ai" id="txtBtn">Estimate</button></div>
+  <p id="status" class="mute" role="status"></p>
+  <section class="card" id="res" hidden>
+    <h2>Scan result</h2><b id="rname"></b><div id="ritems"></div>
+    <div class="row"><span>Total calories (edit if it looks off)</span><input id="rk" type="number" inputmode="numeric" min="0" style="width:96px"></div>
+    <p class="mute">Photo estimates are rough, so treat them as a ballpark.</p>
+    <div class="acts"><button class="btn alt" id="skip">Discard</button><button class="btn blue" id="favBtn">★ Save</button><button class="btn" id="add">Add to today</button></div>
+  </section>
+  <section class="card"><h2>★ Favorites</h2><div id="favs"></div></section><section class="card"><h2>Meals logged</h2><div id="list"></div></section>
+</div>
+
+</div><div class="acc"><button class="acch" data-t="cal" aria-expanded="false"><span class="ico">📅</span><span class="t"><b>Calendar</b><small id="s-cal">Tap a day for details</small></span><span class="chev">▾</span></button><div class="tab" id="t-cal" hidden><section class="card"><div class="cnav"><button class="x" id="cprev" aria-label="Previous month">‹</button><b id="cmon"></b><button class="x" id="cnext" aria-label="Next month">›</button></div><div class="cwk"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div class="cgrid" id="cgrid"></div></section><section class="card" id="cday"></section></div></div><div class="acc"><button class="acch" data-t="body" aria-expanded="false"><span class="ico">💪</span><span class="t"><b>Body</b><small id="s-body">Stats, BMI and body scan</small></span><span class="chev">▾</span></button><div class="tab" id="t-body" hidden>
+  <section class="card">
+    <h2>Your stats</h2>
+    <div class="g2">
+      <label class="f">Height (cm)<input data-k="h" type="number" inputmode="decimal" min="0"></label>
+      <label class="f">Weight (kg)<input data-k="w" type="number" inputmode="decimal" min="0"></label>
+      <label class="f">Age<input data-k="age" type="number" inputmode="numeric" min="0"></label>
+      <label class="f">Sex<select data-k="sex"><option value="">Select</option><option value="m">Male</option><option value="f">Female</option></select></label>
+    </div>
+  </section>
+  <section class="card">
+    <h2>BMI</h2>
+    <div class="big"><span id="bmi">–</span> <span class="chip" id="bcat">Add height and weight</span></div>
+    <div class="gauge"><i class="mark" id="mark"></i></div>
+    <p class="mute">BMI ignores muscle, so if you lift, body fat % below is the better read.</p>
+  </section>
+  <section class="card">
+    <h2>Weight log</h2><div class="add"><input id="wnew" type="number" inputmode="decimal" placeholder="Today’s weight (kg)"><button class="btn blue" id="wlog">Log</button></div><div id="chart"></div><p class="mute" id="wtxt"></p></section><section class="card"><h2>Body scan</h2>
+    <div class="g2"><label class="btn blue scan fp">📸 Take photo<input class="ai" id="bcam" type="file" accept="image/*" capture="environment"></label><label class="btn blue scan fp">🖼️ From gallery<input class="ai" id="bfile" type="file" accept="image/*"></label></div>
+    <p id="bst" class="mute" role="status">A clear, well-lit photo works best. It isn’t saved, it’s only sent to Claude for the estimate.</p>
+    <div class="g2">
+      <label class="f">Body fat % (editable)<input data-k="bf" type="number" inputmode="decimal" min="0" max="60"></label>
+      <label class="f">Body type<select data-k="btype"><option value="">Not set</option><option value="ectomorph">Ectomorph (lean)</option><option value="mesomorph">Mesomorph (athletic)</option><option value="endomorph">Endomorph (fuller)</option><option value="mixed">Mixed</option></select></label>
+    </div>
+    <p class="mute" id="bnote"></p>
+  </section>
+</div>
+
+</div><div class="acc"><button class="acch" data-t="plan" aria-expanded="false"><span class="ico">🎯</span><span class="t"><b>Target</b><small id="s-plan">Calories, protein and goal</small></span><span class="chev">▾</span></button><div class="tab" id="t-plan" hidden>
+  <section class="card">
+    <h2>Your numbers</h2>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="tile"><b id="bmr">–</b>BMR kcal</div><div class="tile r"><b id="tdee">–</b>maintenance kcal</div>
+    </div>
+    <label class="f">Activity level<select data-k="act" data-n="1"><option value="1.2">Sedentary (desk, little exercise)</option><option value="1.375">Light (1–3 workouts a week)</option><option value="1.55">Moderate (3–5 workouts a week)</option><option value="1.725">Very active (hard training or a physical job)</option><option value="1.9">Extreme (athlete or double sessions)</option></select></label>
+    <label class="f" style="margin-top:10px">Goal<select data-k="gt"><option value="lose">Lose fat (about 20% below)</option><option value="maintain">Maintain</option><option value="gain">Build muscle (about 10% above)</option></select></label>
+  </section>
+  <section class="card">
+    <h2>Suggested target</h2>
+    <div class="big"><span id="sug">–</span> <small>kcal / day</small></div>
+    <p class="mute" id="how"></p>
+    <button class="btn" id="useBtn">Use as my goal</button>
+  </section>
+  <section class="card">
+    <h2>Weekly check-in</h2><p class="mute" id="nudge"></p><button class="btn blue" id="nudgeBtn" hidden>Apply to my goal</button></section><section class="card"><h2>My daily goal</h2>
+    <label class="f">Set it however you like (kcal)<input data-k="goal" id="goal" type="number" inputmode="numeric" min="0"></label><label class="f" style="margin-top:10px">Protein goal in grams (blank = about 1.8 g per kg)<input data-k="pg" type="number" inputmode="numeric" min="0"></label>
+    <p class="mute">These are estimates, not medical advice. Adjust based on how your weight and energy respond over a few weeks.</p></section><section class="card"><h2>Background</h2><label class="f" style="display:flex;align-items:center;gap:10px"><input id="bhOn" type="checkbox" style="width:auto;margin:0"> Animated (off = a still, sharp picture that saves battery)</label><label class="f" style="margin-top:10px">Quality<select data-k="bhq"><option value="auto">Auto (your screen's full sharpness)</option><option value="low">Low (1×, saves battery)</option><option value="med">Medium (1.5×)</option><option value="hd">Full HD (1080p)</option><option value="2k">2K (1440p, smoother edges)</option><option value="4k">4K (2160p, slowest)</option></select></label><p class="mute" id="bhInfo"></p></section><section class="card"><h2>AI scanning</h2><p class="mute">Photo scans use your own free Google Gemini key. Get one at aistudio.google.com/apikey and paste it here. It stays on this phone.</p><label class="f">Gemini key<input data-k="gkey" type="password" autocomplete="off" placeholder="Paste your key"></label><label class="f" style="margin-top:10px">Model (leave blank for the default)<input data-k="gmodel" type="text" placeholder="gemini-flash-latest"></label></section><section class="card"><h2>Backup</h2><p class="mute" id="cloud">Everything is saved on this phone automatically. You can also save a copy to your Downloads, or turn on auto-backup below.</p><div class="g2"><button class="btn blue" id="exp">Save backup</button><label class="btn alt fp">Restore<input id="imp" type="file" accept="application/json,.json"></label></div>
+<h2 style="margin-top:18px">Auto-backup (GitHub)</h2><p class="mute">Saves a private copy to your own GitHub repository a few seconds after every change.</p>
+<label class="f">Repository (username/name)<input data-k="ghrepo" type="text" autocapitalize="off" placeholder="your-username/calorie-backup"></label>
+<label class="f" style="margin-top:10px">Token<input data-k="ghtoken" type="password" autocomplete="off" placeholder="Paste your token"></label>
+<div class="g2" style="margin-top:10px"><button class="btn" id="ghOn">Turn on</button><button class="btn alt" id="ghGet">Restore</button></div>
+  </section>
+</div>
+</div></main>
+<script>
+const $=id=>document.getElementById(id),Q=s=>document.querySelectorAll(s);
+const PROMPT="You are a nutrition estimator. Estimate calories and macros for the meal shown in the photo, or described below. Reply with ONLY JSON, no markdown: {\"name\":\"short meal name\",\"items\":[{\"item\":\"food\",\"portion\":\"e.g. 1 cup\",\"kcal\":0}],\"kcal\":0,\"protein\":0,\"carbs\":0,\"sugar\":0,\"fiber\":0,\"fat\":0}. kcal is a whole-number total for the whole meal; protein, carbs, sugar, fiber and fat are grams (sugar is part of the carbs). If there is no food, reply {\"error\":\"no food\"}.";
+const today=()=>new Date().toLocaleDateString("en-CA");
+let meals=[],pending=null,BMR=0,CDOC=null,ct,S={h:"",w:"",age:"",sex:"",bf:"",btype:"",act:1.55,gt:"maintain",goal:2000,pg:"",gkey:"",gmodel:"",ghrepo:"",ghtoken:"",ghon:false,bh:true,bhq:"auto",fav:[],wl:[],dt:"work",dd:"",na:"",ts:0};
+function load(){try{meals=JSON.parse(localStorage.getItem("cal:"+today())||"[]");Object.assign(S,JSON.parse(localStorage.getItem("cal:profile")||"{}"))}catch(e){meals=[]}}
+function save(){S.ts=Date.now();try{localStorage.setItem("cal:"+today(),JSON.stringify(meals));localStorage.setItem("cal:profile",JSON.stringify(S))}catch(e){}schedulePush()}
+function go(t,tog){const was=!$("t-"+t).hidden;Q(".tab").forEach(s=>s.hidden=true);if(!(tog&&was))$("t-"+t).hidden=false;Q(".acch").forEach(b=>{const o=b.dataset.t===t&&!$("t-"+t).hidden;b.classList.toggle("open",o);b.setAttribute("aria-expanded",o)});document.querySelector('.acch[data-t="'+t+'"]').scrollIntoView({behavior:"smooth",block:"start"});if(t==='cal'&&!$('t-cal').hidden)dayShow(cs)}
+function render(){
+  const t=meals.reduce((a,m)=>({k:a.k+m.kcal,p:a.p+m.p,c:a.c+m.c,f:a.f+m.f,s:a.s+(m.s||0),fi:a.fi+(m.fi||0)}),{k:0,p:0,c:0,f:0,s:0,fi:0}),g=dayGoal();
+  $("eaten").textContent=Math.round(t.k);$("goalv").textContent=g;
+  $("fill").style.width=Math.min(100,g?t.k/g*100:0)+"%";
+  $("fill").style.background=t.k>g?"linear-gradient(90deg,#b3122a,#e5243b)":"";
+  $("p").textContent=Math.round(t.p);$("c").textContent=Math.round(t.c);$("f").textContent=Math.round(t.f);$("sg").textContent=Math.round(t.s);$("fb").textContent=Math.round(t.fi);extra(t);
+  const L=$("list");L.textContent="";
+  if(!meals.length){const e=document.createElement("span");e.className="mute";e.textContent="Nothing logged yet. Scan your first meal and let’s go!";L.append(e);return}
+  meals.forEach((m,i)=>{
+    const r=document.createElement("div"),n=document.createElement("span"),k=document.createElement("b"),x=document.createElement("button");
+    r.className="row";n.textContent=m.name;k.textContent=m.kcal+" kcal";x.className="x";x.textContent="×";x.setAttribute("aria-label","Remove");
+    x.onclick=()=>{meals.splice(i,1);save();render()};r.append(n,k,x);L.append(r);
+  });
+}
+function calc(){
+  const {h,w,age,sex,bf,act,gt}=S,ok=h>0&&w>0,bmi=ok?w/((h/100)**2):0;
+  $("bmi").textContent=ok?bmi.toFixed(1):"–";
+  $("bcat").textContent=!ok?"Add height and weight":bmi<18.5?"Underweight":bmi<25?"Healthy range":bmi<30?"Overweight":"Obese range";
+  $("mark").style.left=ok?Math.min(100,Math.max(0,(bmi-15)/25*100))+"%":"-10%";
+  let bmr=0,how="Fill in your Body tab (height, weight, age, sex) or run a body scan to get your estimate.";
+  if(ok&&bf>0&&bf<60){bmr=370+21.6*w*(1-bf/100);how="Based on your lean mass (Katch-McArdle) and activity level."}
+  else if(ok&&age>0&&(sex==="m"||sex==="f")){bmr=10*w+6.25*h-5*age+(sex==="f"?-161:5);how="Based on height, weight, age and sex (Mifflin-St Jeor) and activity level."}
+  const tdee=bmr*act;let t=tdee*({lose:.8,maintain:1,gain:1.1}[gt]||1);
+  if(gt==="lose")t=Math.max(t,bmr,1200);
+  BMR=bmr;$("bmr").textContent=bmr?Math.round(bmr):"–";$("tdee").textContent=bmr?Math.round(tdee):"–";
+  $("sug").textContent=bmr?Math.round(t/10)*10:"–";$("how").textContent=how;$("useBtn").disabled=!bmr;
+}
+async function shrink(file){
+  try{
+    const b=await createImageBitmap(file),s=Math.min(1,1024/Math.max(b.width,b.height)),cv=document.createElement("canvas");
+    cv.width=Math.round(b.width*s);cv.height=Math.round(b.height*s);
+    cv.getContext("2d").drawImage(b,0,0,cv.width,cv.height);
+    return (await new Promise(r=>cv.toBlob(r,"image/jpeg",0.85)))||file;
+  }catch(e){return file}
+}
+const msg=e=>{const c=e&&e.code,d=e&&e.detail?' '+String(e.detail).slice(0,160):'';
+if(c==='nokey')return 'Add your free Gemini key first: open Target and scroll to AI scanning.';
+if(c==='offline')return 'No connection. Check your internet and try again.';
+if(c==='blocked')return 'Google didn’t return an answer for that photo ('+(e.detail||'blocked')+'). Try a different photo.';
+if(c==='badjson')return 'The answer wasn’t in the format I expected: '+e.detail;
+if(c==='http400'||c==='http403')return 'Google rejected the request. Check your key and model name.'+d;
+if(c==='http404')return 'That model name wasn’t found. Clear the Model box in Target to use the default.'+d;
+if(c==='http429')return 'Free limit reached for now. Wait a minute, or try again tomorrow.';
+if(c==='nofood')return 'I couldn’t spot any food. Try a closer photo.';
+if(c==='nobody')return 'I couldn’t read a body in that photo. Try a clearer one.';
+return 'Something went wrong ('+(c||(e&&e.name)||'error')+'). Try again.'+d};
+function lock(b){Q(".ai").forEach(e=>e.disabled=b);Q(".scan").forEach(l=>l.classList.toggle("off",b))}
+function b64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}
+async function gemini(input,blob){
+  const key=(S.gkey||'').trim();if(!key)throw {code:'nokey'};
+  const model=(S.gmodel||'gemini-flash-latest').trim(),parts=[{text:input}];
+  if(blob)parts.push({inline_data:{mime_type:'image/jpeg',data:await b64(blob)}});
+  let r;try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}],generationConfig:{responseMimeType:'application/json',temperature:.2}})})}catch(e){throw {code:'offline'}}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw {code:'http'+r.status,detail:(j.error&&j.error.message)||''};
+  const c=j.candidates&&j.candidates[0],t=c&&c.content&&c.content.parts&&c.content.parts.map(p=>p.text||'').join('');
+  if(!t)throw {code:'blocked',detail:(j.promptFeedback&&j.promptFeedback.blockReason)||(c&&c.finishReason)||''};
+  const m=t.match(/\{[\s\S]*\}/);try{return JSON.parse(m?m[0]:t)}catch(e){throw {code:'badjson',detail:t.slice(0,140)}}
+}
+async function ask(st,input,blob,done){
+  st.textContent='Analyzing…';lock(true);
+  try{done(await gemini(input,blob));if(st.textContent==='Analyzing…')st.textContent=st.dataset.ok||''}
+  catch(e){st.textContent=msg(e)}
+  finally{lock(false)}
+}
+function show(d){
+  if(!d||d.error||!d.kcal)throw {code:"nofood"};
+  pending={name:d.name||"Meal",kcal:Math.round(d.kcal),p:+d.protein||0,c:+d.carbs||0,f:+d.fat||0,s:+d.sugar||0,fi:+d.fiber||0};
+  $("rname").textContent=pending.name;$("rk").value=pending.kcal;$("favBtn").textContent='★ Save';
+  const box=$("ritems");box.textContent="";
+  (d.items||[]).forEach(it=>{
+    const r=document.createElement("div"),a=document.createElement("span"),b=document.createElement("span");
+    r.className="row";a.textContent=it.item+(it.portion?" · "+it.portion:"");b.textContent=Math.round(it.kcal||0)+" kcal";r.append(a,b);box.append(r);
+  });
+  $("res").hidden=false;$("res").scrollIntoView({behavior:"smooth"});
+}
+function bodyDone(d){
+  const bf=Math.round(parseFloat(d&&(d.bodyFat??d.body_fat)));
+  if(!d||d.error||!(bf>2&&bf<60))throw {code:"nobody"};
+  const t=String(d.bodyType||"").toLowerCase();
+  S.bf=bf;S.btype=["ectomorph","mesomorph","endomorph"].includes(t)?t:"mixed";save();
+  Q('[data-k]').forEach(el=>el.value=S[el.dataset.k]);
+  $("bnote").textContent="Estimated "+(d.low||bf-2)+"–"+(d.high||bf+2)+"% body fat. "+(d.structure||"");
+  calc();
+}
+function bodyPrompt(){
+  const ctx=[S.sex==="m"?"male":S.sex==="f"?"female":"",S.h?S.h+" cm":"",S.w?S.w+" kg":""].filter(Boolean).join(", ");
+  return "A user tracking their own fitness progress shared their own photo. Give a rough visual estimate of body fat percentage and body type, always including a best-guess number."+(ctx?" Known: "+ctx+".":"")+" Reply with ONLY JSON, no markdown: {\"bodyFat\":0,\"low\":0,\"high\":0,\"bodyType\":\"Ectomorph or Mesomorph or Endomorph or Mixed\",\"structure\":\"one or two short sentences about frame and proportions\"}. These are rough estimates, not medical advice. If the photo shows no person, reply {\"error\":\"no body\"}.";
+}
+$("add").onclick=()=>{
+  if(!pending)return;
+  const k=Math.round(+$("rk").value)||0,q=pending.kcal?k/pending.kcal:1;
+  meals.push({name:pending.name,kcal:k,p:pending.p*q,c:pending.c*q,f:pending.f*q,s:pending.s*q,fi:pending.fi*q});
+  save();render();$("res").hidden=true;pending=null;
+};
+$("skip").onclick=()=>{$("res").hidden=true;pending=null};
+$("useBtn").onclick=()=>{S.goal=+$("sug").textContent||S.goal;$("goal").value=S.goal;save();render();go("today")};
+$("goalEdit").onclick=()=>go("plan");
+Q(".acch").forEach(b=>b.onclick=()=>go(b.dataset.t,true));
+Q("[data-k]").forEach(el=>{
+  const k=el.dataset.k;el.value=S[k];
+  el.oninput=()=>{S[k]=el.type==="number"||el.dataset.n?(el.value===""?"":+el.value):el.value;save();calc();render()};
+});
+$("file").onchange=$("gfile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const b=new Blob([await f.arrayBuffer()],{type:f.type||"image/jpeg"});e.target.value="";ask($("status"),PROMPT,await shrink(b),show)}catch(x){$("status").textContent="I couldn’t read that photo. Try another one."}};
+$("bfile").onchange=$("bcam").onchange=async e=>{const f=e.target.files[0],st=$("bst");if(!f)return;st.dataset.ok="Done. Fix the numbers below if they look off.";st.textContent="Reading your photo…";try{const buf=await f.arrayBuffer(),blob=new Blob([buf],{type:f.type||"image/jpeg"});e.target.value="";st.textContent="Photo loaded ("+Math.round(buf.byteLength/1024)+" KB). Sending to Claude…";ask(st,bodyPrompt(),await shrink(blob),bodyDone)}catch(x){st.textContent="I couldn’t read that photo ("+((x&&x.name)||"error")+"). Try another one."}};
+$("txtBtn").onclick=()=>{const v=$("txt").value.trim();if(v){$("txt").value="";ask($("status"),PROMPT+"\n\nMeal description: "+v,null,show)}};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){load();newDay();render()}});
+$("day").textContent="· "+new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+const DM={train:1.08,work:1,rest:.92};
+const dayGoal=()=>Math.round((+S.goal||0)*(DM[S.dt]||1)/10)*10;
+function newDay(){if(S.dd!==today()){S.dd=today();S.dt='work'}}
+function extra(t){const p=t.p;Q('.days button').forEach(b=>b.classList.toggle('on',b.dataset.d===S.dt));const pg=+S.pg||(S.w?Math.round(S.w*1.8):0);$('pfill').style.width=Math.min(100,pg?p/pg*100:0)+'%';$('ptxt').textContent=pg?Math.round(p)+' / '+pg+' g protein':'Add your weight in the Body tab for a protein goal.';favs();chart();nudge();sums(t.k)}
+function favs(){const box=$('favs');box.textContent='';if(!S.fav.length){box.className='mute';box.textContent='No favorites yet. Scan a meal, then tap ★ Save.';return}box.className='favs';S.fav.forEach((m,i)=>{const b=document.createElement('button'),x=document.createElement('button');b.className='chipb';b.textContent=m.name+' · '+m.kcal;b.onclick=()=>{meals.push({...m});save();render()};x.className='x';x.textContent='×';x.setAttribute('aria-label','Remove favorite');x.onclick=()=>{S.fav.splice(i,1);save();render()};box.append(b,x)})}
+function chart(){const a=S.wl.slice(-30),el=$('chart');if(a.length<2){el.textContent='';$('wtxt').textContent='Log your weight a few times to see your trend.';return}const ws=a.map(x=>x.w),lo=Math.min(...ws)-.5,hi=Math.max(...ws)+.5,X=i=>10+i*280/(a.length-1),Y=w=>110-(w-lo)/(hi-lo)*100;el.innerHTML='<svg viewBox="0 0 300 120" width="100%" role="img" aria-label="Weight trend"><polyline style="fill:none;stroke:var(--blue);stroke-width:3;stroke-linejoin:round" points="'+a.map((x,i)=>X(i)+','+Y(x.w)).join(' ')+'"/><circle style="fill:var(--red)" cx="'+X(a.length-1)+'" cy="'+Y(ws[ws.length-1])+'" r="5"/></svg>';$('wtxt').textContent=ws[ws.length-1]+' kg now · range '+Math.min(...ws)+'–'+Math.max(...ws)+' kg'}
+function nudge(){const T=Date.parse(today()),a=S.wl.filter(x=>T-Date.parse(x.d)<=28*864e5);let adj=0,txt='Log your weight for a week or two and I’ll check how your target is working.';if(S.na&&T-Date.parse(S.na)<14*864e5)txt='You adjusted your goal on '+S.na+'. Give it two weeks before the next check.';else if(a.length>1){const f=a[0],l=a[a.length-1],dd=(Date.parse(l.d)-Date.parse(f.d))/864e5;if(dd>=7){const r=(l.w-f.w)/dd*7,g=S.gt;let blocked=false;adj=g==='lose'?(r>-.2?-100:r<-1?150:0):g==='gain'?(r<.1?150:r>.5?-100:0):(r>.3?-100:r<-.3?100:0);if(adj<0&&(+S.goal||0)+adj<Math.max(BMR,1200)){adj=0;blocked=true}txt='Your trend: '+(r>0?'+':'')+r.toFixed(2)+' kg/week. '+(adj?'I’d '+(adj>0?'add':'cut')+' about '+Math.abs(adj)+' kcal on your goal.':blocked?'You’re close to the lowest sensible target, so I wouldn’t cut further.':'That fits your goal, so keep your target as it is.')}}$('nudge').textContent=txt;$('nudgeBtn').hidden=!adj;$('nudgeBtn').dataset.adj=adj}
+let ghSha=null,ghT;
+function schedulePush(){clearTimeout(ghT);if(S.ghon&&S.ghtoken&&S.ghrepo)ghT=setTimeout(ghPush,4000)}
+function snap(){const d={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('cal:'))d[k]=localStorage.getItem(k)}}catch(e){}
+  try{const p=JSON.parse(d['cal:profile']||'{}');delete p.gkey;delete p.ghtoken;d['cal:profile']=JSON.stringify(p)}catch(e){}
+  return JSON.stringify(d)}
+const gh=(path,opt)=>fetch('https://api.github.com/repos/'+S.ghrepo.trim()+'/contents/'+path,Object.assign({headers:{'Authorization':'Bearer '+S.ghtoken.trim(),'Accept':'application/vnd.github+json','Content-Type':'application/json'}},opt));
+const ghErr=e=>e&&e.status===401?'GitHub rejected the token. Make a new one and paste it again.':e&&e.status?'GitHub couldn’t reach that repository ('+e.status+'). Check the name and the token’s access.':'Couldn’t reach GitHub. It will retry after your next change.';
+async function ghPush(){
+  const st=$('cloud');
+  try{
+    const put=()=>gh('backup.json',{method:'PUT',body:JSON.stringify(Object.assign({message:'Auto backup',content:btoa(unescape(encodeURIComponent(snap())))},ghSha?{sha:ghSha}:{}))});
+    let r=await put();
+    if(r.status===409||r.status===422){const g=await gh('backup.json');ghSha=g.ok?(await g.json()).sha:null;r=await put()}
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)throw {status:r.status};
+    ghSha=j.content.sha;st.textContent='☁️ Auto-backed up at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'.'
+  }catch(e){st.textContent=ghErr(e)}
+}
+async function ghGet(){
+  const st=$('cloud');
+  try{
+    const r=await gh('backup.json');if(!r.ok)throw {status:r.status};
+    const j=await r.json();ghSha=j.sha;const d=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
+    Object.keys(d).filter(k=>k.startsWith('cal:')).forEach(k=>localStorage.setItem(k,d[k]));
+    load();newDay();Q('[data-k]').forEach(el=>el.value=S[el.dataset.k]);calc();render();st.textContent='☁️ Restored from GitHub.'
+  }catch(e){st.textContent=ghErr(e)}
+}
+$('ghOn').onclick=()=>{if(!(S.ghtoken&&S.ghrepo)){$('cloud').textContent='Fill in the repository and the token first.';return}S.ghon=true;save();clearTimeout(ghT);$('cloud').textContent='Backing up…';ghPush()};
+$('ghGet').onclick=()=>{if(!(S.ghtoken&&S.ghrepo)){$('cloud').textContent='Fill in the repository and the token first.';return}ghGet()};
+let cm=new Date(),cs=today();cm.setDate(1);
+const fmt=n=>Math.round(n);
+function dayData(d){let m=[];try{m=JSON.parse(localStorage.getItem('cal:'+d)||'[]')}catch(e){}const w=S.wl.find(x=>x.d===d);return {m,w:w&&w.w}}
+function cal(){
+  const y=cm.getFullYear(),mo=cm.getMonth(),g=$('cgrid'),T=today();g.textContent='';
+  $('cmon').textContent=cm.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  for(let i=0,lead=new Date(y,mo,1).getDay();i<lead;i++)g.append(document.createElement('span'));
+  for(let i=1,n=new Date(y,mo+1,0).getDate();i<=n;i++){
+    const d=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(i).padStart(2,'0'),b=document.createElement('button'),r=dayData(d);
+    b.className='cd'+(r.m.length?' has':'')+(r.w?' wt':'')+(d===T?' today':'')+(d===cs?' sel':'');b.textContent=i;b.onclick=()=>dayShow(d);g.append(b)
+  }
+}
+function dayShow(d){
+  cs=d;cal();
+  const r=dayData(d),m=r.m,t=m.reduce((a,x)=>({k:a.k+x.kcal,p:a.p+x.p,c:a.c+x.c,f:a.f+x.f,s:a.s+(x.s||0),fi:a.fi+(x.fi||0)}),{k:0,p:0,c:0,f:0,s:0,fi:0});
+  const has=k=>m.some(x=>x[k]!=null),T=(l,v,ok)=>'<div class="tile"><b>'+(ok?fmt(v)+' g':'–')+'</b>'+l+'</div>';
+  const box=$('cday');box.textContent='';
+  const h=document.createElement('h2');h.textContent=new Date(d+'T12:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  const top=document.createElement('div');top.className='g2';top.innerHTML='<div class="tile r"><b>'+(r.w?r.w+' kg':'–')+'</b>weight</div><div class="tile"><b>'+fmt(t.k)+'</b>kcal eaten</div>';
+  const g=document.createElement('div');g.className='g3';g.style.marginTop='8px';
+  g.innerHTML=T('protein',t.p,m.length)+T('carbs',t.c,m.length)+T('fat',t.f,m.length)+T('sugar',t.s,has('s'))+T('fiber',t.fi,has('fi'));
+  box.append(h,top,g);
+  if(!m.length){const e=document.createElement('p');e.className='mute';e.textContent='No meals logged this day.';box.append(e)}
+  m.forEach(x=>{const row=document.createElement('div'),a=document.createElement('span'),b=document.createElement('b');row.className='row';a.textContent=x.name;b.textContent=fmt(x.kcal)+' kcal';row.append(a,b);box.append(row)})
+}
+$('cprev').onclick=()=>{cm.setMonth(cm.getMonth()-1);cal()};
+$('cnext').onclick=()=>{cm.setMonth(cm.getMonth()+1);cal()};
+const BHF=`#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+uniform vec2 uRes;uniform float uTime;uniform float uCy;
+const float D=35.,RIN=6.,ROUT=15.;
+float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float h31(vec3 p){p=fract(p*vec3(443.897,441.423,437.195));p+=dot(p,p.yzx+19.19);return fract((p.x+p.y)*p.z);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1.,0.)),f.x),mix(h21(i+vec2(0.,1.)),h21(i+vec2(1.,1.)),f.x),f.y);}
+vec3 stars(vec3 d){vec3 s=d*60.,id=floor(s),f=fract(s)-.5;float h=h31(id);float m=step(.993,h);float k=smoothstep(.45,0.,length(f))*m*(.5+h31(id+7.));return mix(vec3(.7,.85,1.),vec3(1.,.85,.65),h31(id+3.))*k;}
+void main(){
+ vec2 q=(gl_FragCoord.xy-.5*uRes)/min(uRes.x,uRes.y);q.y-=uCy;
+ float el=.1+.018*sin(uTime*.11);
+ vec3 e1=vec3(0.,sin(el),cos(el));
+ vec3 fw=-e1,rt=normalize(cross(fw,vec3(0.,1.,0.))),up=cross(rt,fw);
+ vec3 rd=normalize(fw+(q.x*rt+q.y*up)*.64);
+ float cr=dot(rd,e1);vec3 tg=rd-cr*e1;float ct=length(tg);vec3 e2=ct>1e-5?tg/ct:rt;
+ float b=max(D*ct/sqrt(1.-2./D),.01);
+ float u=1./D;float w=sqrt(max(1./(b*b)-u*u*(1.-2.*u),0.));
+ float dpA=.28,cdA=cos(dpA),sdA=sin(dpA),dpB=.12,cdB=cos(dpB),sdB=sin(dpB);
+ float A=e1.y,B=e2.y,cp=1.,sp=0.,sPrev=A,ph=0.;
+ vec3 col=vec3(0.),dir=vec3(0.);float tr=1.;bool esc=false;float sw=0.;
+ for(int i=0;i<160;i++){
+  bool far=u<.06;float dp=far?dpA:dpB,cd=far?cdA:cdB,sd=far?sdA:sdB;float k1w=-u+3.*u*u;
+  float u2=u+.5*dp*w,w2=w+.5*dp*k1w,k2w=-u2+3.*u2*u2;
+  float u3=u+.5*dp*w2,w3=w+.5*dp*k2w,k3w=-u3+3.*u3*u3;
+  float u4=u+dp*w3,w4=w+dp*k3w,k4w=-u4+3.*u4*u4;
+  float un=u+dp/6.*(w+2.*w2+2.*w3+w4),wn=w+dp/6.*(k1w+2.*k2w+2.*k3w+k4w);
+  float cn=cp*cd-sp*sd,sn=sp*cd+cp*sd,sNew=A*cn+B*sn;
+  if(sPrev*sNew<0.){
+   float f=sPrev/(sPrev-sNew),uc=mix(u,un,f),a=f*dp,ca=cos(a),sa=sin(a);
+   float cc=cp*ca-sp*sa,sc=sp*ca+cp*sa,rr=1./uc;
+   if(rr>RIN&&rr<ROUT){
+    vec3 rv=rr*(cc*e1+sc*e2);
+    float x=(rr-RIN)/(ROUT-RIN);
+    float prof=pow(RIN/rr,2.4)*smoothstep(0.,.04,x)*(1.-smoothstep(.3,1.,x));
+    float beta=sqrt(1./(rr-2.));
+    vec3 th=-sc*e1+cc*e2,ph=normalize(vec3(-rv.z,0.,rv.x));
+    float sinp=min(b*sqrt(1.-2./rr)/rr,1.);
+    float g=sqrt(1.-2./rr)/(sqrt(1.-beta*beta)*(1.+beta*sinp*dot(th,ph)))/sqrt(1.-2./D);
+    float an=uTime*2.5*pow(rr,-1.5),c2=cos(an),s2=sin(an);
+    vec2 sq=vec2(c2*rv.x+s2*rv.z,-s2*rv.x+c2*rv.z);
+    float nz=.6*vn(sq*1.7)+.4*vn(sq*5.);
+    float tex=.8+.55*nz*(.5+.5*vn(vec2(rr*9.,3.)));
+    float I=prof*tex*pow(g,1.6)*2.7,T=clamp(I,0.,1.8);
+    vec3 cl=mix(vec3(1.,.34,.07),vec3(1.,.64,.22),smoothstep(0.,.55,T));
+    cl=mix(cl,vec3(1.,.9,.7),smoothstep(.8,1.7,T));
+    float op=clamp(3.*prof,0.,.93);
+    col+=tr*cl*I*op;tr*=1.-op;
+    if(tr<.03)break;
+   }
+  }
+  u=un;w=wn;cp=cn;sp=sn;sPrev=sNew;ph+=dp;
+  if(u>.34&&w>0.){tr=0.;break;}
+  if(u<.0143&&w<0.){esc=true;sw=ph;dir=normalize(-w*(cp*e1+sp*e2)+u*(-sp*e1+cp*e2));break;}
+ }
+ if(esc)col+=tr*stars(dir)*(1.-smoothstep(4.,5.5,sw))*.8;
+ col=1.-exp(-col*1.2);col+=vec3(.004,.007,.02);
+ gl_FragColor=vec4(pow(col,vec3(.92)),1.);
+}`;
+const BHL=[.4,.5,.65,.8,1,1.25,1.6,2,2.5],BHN=6;
+let bhGl=null,bhRaf=0,bhU={},bhT0=performance.now(),bhC={lvl:1,per:1,dts:[],vs:16.7,cool:30,okFull:0,ceil:99,band:0,last:0,n:0,bad:{}};
+function bhMax(){const d=Math.max(1,devicePixelRatio||1);let m=0;BHL.forEach((v,i)=>{if(v<=d*1.001&&v*v*innerWidth*innerHeight<=3.2e6)m=i});return m}
+function bhStore(){try{localStorage.setItem('bh:q',JSON.stringify({l:bhC.lvl,c:bhC.ceil}))}catch(e){}}
+function bhSize(){const c=$('bh'),v=BHL[bhC.lvl];c.width=Math.max(120,Math.round(innerWidth*v));c.height=Math.max(200,Math.round(innerHeight*v));const f=$('bhInfo');if(f)f.textContent='Now drawing at '+c.width+' × '+c.height+' pixels.';if(bhGl){bhGl.viewport(0,0,c.width,c.height);bhGl.uniform2f(bhU.res,c.width,c.height);bhGl.uniform1f(bhU.cy,(innerHeight/2-150)/Math.min(innerWidth,innerHeight))}}
+function bhBand(t,i,N){const c=$('bh'),y0=Math.floor(c.height*i/N),y1=Math.floor(c.height*(i+1)/N);bhGl.scissor(0,y0,c.width,y1-y0);bhGl.uniform1f(bhU.t,t);bhGl.drawArrays(bhGl.TRIANGLES,0,3)}
+function bhFull(t){for(let i=0;i<BHN;i++)bhBand(t,i,BHN)}
+function bhLevel(){const q=S.bhq||'auto',m=bhMax();return q==='low'?Math.min(1,m):q==='med'?Math.min(3,m):q==='high'?Math.min(5,m):q==='max'?m:null}
+function bhAdapt(dt){
+  const C=bhC;C.dts.push(dt);if(C.dts.length>30)C.dts.shift();
+  if(C.n<60)C.vs=Math.max(5,Math.min(C.vs,dt));
+  if(C.cool>0){C.cool--;return}
+  if(C.dts.length<20)return;
+  const jank=C.dts.filter(d=>d>C.vs*1.5).length/C.dts.length,auto=(S.bhq||'auto')==='auto';
+  if(jank>.3){
+    C.okFull=0;
+    if(C.per>1){C.per--;C.cool=20}
+    else if(auto&&C.lvl>0){C.bad[C.lvl]=(C.bad[C.lvl]||0)+1;if(C.bad[C.lvl]>=2)C.ceil=Math.min(C.ceil,C.lvl-1);C.lvl--;bhSize();bhFull((performance.now()-bhT0)/1000+10);C.cool=60;C.dts=[];bhStore()}
+  }else if(jank<.08){
+    if(C.per<BHN){C.per++;C.cool=15}
+    else if(auto&&++C.okFull>=150&&C.lvl<Math.min(C.ceil,bhMax())){C.lvl++;C.per=1;C.okFull=0;bhSize();bhFull((performance.now()-bhT0)/1000+10);C.cool=60;C.dts=[];bhStore()}
+  }
+}
+function bhTick(now){
+  bhRaf=requestAnimationFrame(bhTick);
+  const C=bhC,dt=now-C.last;C.last=now;
+  if(dt>150){C.cool=Math.max(C.cool,20);C.dts=[];return}
+  C.n++;if(C.n<4)return;
+  for(let k=0;k<C.per;k++){bhBand((now-bhT0)/1000+10,C.band,BHN);C.band=(C.band+1)%BHN}
+  bhAdapt(dt)
+}
+function bhStill(){
+  bhC.lvl=Math.min(bhMax(),7);bhSize();$('bh').classList.add('on');let i=0;const N=24;
+  const step=()=>{if(!bhGl)return;for(let k=0;k<3&&i<N;k++,i++)bhBand(10,i,N);if(i<N)bhRaf=requestAnimationFrame(step)};
+  bhRaf=requestAnimationFrame(step)
+}
+function bhApply(){if(B2){b2Apply();return}
+  cancelAnimationFrame(bhRaf);bhRaf=0;const off=!bhGl;
+  document.body.classList.toggle('nogl',off);if(off)return;
+  const calm=S.bh===false||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if(calm){bhStill();return}
+  const fx=bhLevel(),m=bhMax();let st=null;try{st=JSON.parse(localStorage.getItem('bh:q')||'null')}catch(e){}
+  bhC.ceil=st&&st.c!=null?Math.min(st.c,m):m;
+  bhC.lvl=fx!=null?fx:Math.min(st&&st.l!=null?st.l:1,bhC.ceil);
+  Object.assign(bhC,{per:1,dts:[],cool:30,okFull:0,n:0,last:performance.now(),band:0,bad:{}});
+  bhSize();bhFull((performance.now()-bhT0)/1000+10);bhRaf=requestAnimationFrame(bhTick);$('bh').classList.add('on')
+}
+function bhInit(){B2=b2Init();
+  const c=$('bh');
+  try{
+    const gl=B2?null:c.getContext('webgl',{antialias:false,alpha:false,powerPreference:'low-power',preserveDrawingBuffer:true});
+    if(gl){
+      const mk=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
+      const pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,BHF));gl.linkProgram(pr);
+      if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
+      gl.useProgram(pr);gl.enable(gl.SCISSOR_TEST);const bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+      const l=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0);
+      bhU={res:gl.getUniformLocation(pr,'uRes'),t:gl.getUniformLocation(pr,'uTime'),cy:gl.getUniformLocation(pr,'uCy')};bhGl=gl;
+      c.addEventListener('webglcontextlost',e=>{e.preventDefault();bhGl=null;bhApply()})
+    }
+  }catch(e){bhGl=null;window.bhError=String(e)}
+  $('bhOn').checked=S.bh!==false;$('bhOn').onchange=()=>{S.bh=$('bhOn').checked;save();bhApply()};
+  document.querySelector('[data-k="bhq"]').addEventListener('change',bhApply);
+  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(bhGl)bhApply()},300)});
+  bhApply()
+}
+const B2PRE=`#version 300 es
+precision highp float;precision highp int;precision highp sampler2D;
+const float D=35.,RIN=6.,ROUT=15.;
+float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float h31(vec3 p){p=fract(p*vec3(443.897,441.423,437.195));p+=dot(p,p.yzx+19.19);return fract((p.x+p.y)*p.z);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1.,0.)),f.x),mix(h21(i+vec2(0.,1.)),h21(i+vec2(1.,1.)),f.x),f.y);}
+vec3 stars(vec3 d){vec3 s=d*60.,id=floor(s),f=fract(s)-.5;float h=h31(id);float m=step(.993,h);float k=smoothstep(.45,0.,length(f))*m*(.5+h31(id+7.));return mix(vec3(.7,.85,1.),vec3(1.,.85,.65),h31(id+3.))*k;}
+uniform float uScale,uNorm;uniform vec2 uCenter;
+layout(location=0) out vec4 o0;layout(location=1) out vec4 o1;layout(location=2) out vec4 o2;layout(location=3) out vec4 o3;
+void main(){
+ vec2 q=(gl_FragCoord.xy/uScale-uCenter)/uNorm;
+ float el=.1;
+ vec3 e1=vec3(0.,sin(el),cos(el));
+ vec3 fw=-e1,rt=normalize(cross(fw,vec3(0.,1.,0.))),up=cross(rt,fw);
+ vec3 rd=normalize(fw+(q.x*rt+q.y*up)*.64);
+ float cr=dot(rd,e1);vec3 tg=rd-cr*e1;float ct=length(tg);vec3 e2=ct>1e-5?tg/ct:rt;
+ float b=max(D*ct/sqrt(1.-2./D),.01);
+ float u=1./D;float w=sqrt(max(1./(b*b)-u*u*(1.-2.*u),0.));
+ float dpA=.28,cdA=cos(dpA),sdA=sin(dpA),dpB=.12,cdB=cos(dpB),sdB=sin(dpB);
+ float A=e1.y,B=e2.y,cp=1.,sp=0.,sPrev=A,ph=0.;
+ vec4 R0=vec4(0.),R1=vec4(0.),R2=vec4(0.);vec3 bg=vec3(0.);float tr=1.;int nc=0;
+ for(int i=0;i<160;i++){
+  bool far=u<.06;float dp=far?dpA:dpB,cd=far?cdA:cdB,sd=far?sdA:sdB;
+  float k1w=-u+3.*u*u;
+  float u2=u+.5*dp*w,w2=w+.5*dp*k1w,k2w=-u2+3.*u2*u2;
+  float u3=u+.5*dp*w2,w3=w+.5*dp*k2w,k3w=-u3+3.*u3*u3;
+  float u4=u+dp*w3,w4=w+dp*k3w,k4w=-u4+3.*u4*u4;
+  float un=u+dp/6.*(w+2.*w2+2.*w3+w4),wn=w+dp/6.*(k1w+2.*k2w+2.*k3w+k4w);
+  float cn=cp*cd-sp*sd,sn=sp*cd+cp*sd,sNew=A*cn+B*sn;
+  if(sPrev*sNew<0.){
+   float f=sPrev/(sPrev-sNew),uc=mix(u,un,f),a=f*dp,ca=cos(a),sa=sin(a);
+   float cc=cp*ca-sp*sa,sc=sp*ca+cp*sa,rr=1./uc;
+   if(rr>RIN&&rr<ROUT){
+    vec3 rv=rr*(cc*e1+sc*e2);
+    float x=(rr-RIN)/(ROUT-RIN);
+    float prof=pow(RIN/rr,2.4)*smoothstep(0.,.04,x)*(1.-smoothstep(.3,1.,x));
+    float beta=sqrt(1./(rr-2.));
+    vec3 th=-sc*e1+cc*e2,pd=normalize(vec3(-rv.z,0.,rv.x));
+    float sinp=min(b*sqrt(1.-2./rr)/rr,1.);
+    float g=sqrt(1.-2./rr)/(sqrt(1.-beta*beta)*(1.+beta*sinp*dot(th,pd)))/sqrt(1.-2./D);
+    vec4 rec=vec4(rv.x,rv.z,pow(g,1.6),1.);
+    if(nc==0)R0=rec;else if(nc==1)R1=rec;else R2=rec;
+    nc++;tr*=1.-clamp(3.*prof,0.,.93);
+    if(tr<.03||nc>=3)break;
+   }
+  }
+  u=un;w=wn;cp=cn;sp=sn;sPrev=sNew;ph+=dp;
+  if(u>.34&&w>0.){break;}
+  if(u<.0143&&w<0.){vec3 dir=normalize(-w*(cp*e1+sp*e2)+u*(-sp*e1+cp*e2));bg=stars(dir)*(1.-smoothstep(4.,5.5,ph))*.8;break;}
+ }
+ o0=R0;o1=R1;o2=R2;o3=vec4(bg,1.);
+}`,B2SHOW=`#version 300 es
+precision highp float;precision highp int;precision highp sampler2D;
+const float D=35.,RIN=6.,ROUT=15.;
+float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float h31(vec3 p){p=fract(p*vec3(443.897,441.423,437.195));p+=dot(p,p.yzx+19.19);return fract((p.x+p.y)*p.z);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1.,0.)),f.x),mix(h21(i+vec2(0.,1.)),h21(i+vec2(1.,1.)),f.x),f.y);}
+vec3 stars(vec3 d){vec3 s=d*60.,id=floor(s),f=fract(s)-.5;float h=h31(id);float m=step(.993,h);float k=smoothstep(.45,0.,length(f))*m*(.5+h31(id+7.));return mix(vec3(.7,.85,1.),vec3(1.,.85,.65),h31(id+3.))*k;}
+uniform sampler2D uR0,uR1,uR2,uBG;uniform float uTime;
+out vec4 fc;
+vec3 emit(vec4 r,out float op){
+ float rr=length(r.xy);
+ float x=(rr-RIN)/(ROUT-RIN);
+ float prof=pow(RIN/rr,2.4)*smoothstep(0.,.04,x)*(1.-smoothstep(.3,1.,x));
+ float an=uTime*2.5*pow(rr,-1.5),c2=cos(an),s2=sin(an);
+ vec2 sq=vec2(c2*r.x+s2*r.y,-s2*r.x+c2*r.y);
+ float nz=.6*vn(sq*1.7)+.4*vn(sq*5.);
+ float tex=.8+.55*nz*(.5+.5*vn(vec2(rr*9.,3.)));
+ float I=prof*tex*r.z*2.7,T=clamp(I,0.,1.8);
+ vec3 cl=mix(vec3(1.,.34,.07),vec3(1.,.64,.22),smoothstep(0.,.55,T));
+ cl=mix(cl,vec3(1.,.9,.7),smoothstep(.8,1.7,T));
+ op=clamp(3.*prof,0.,.93);
+ return cl*I*op;
+}
+void main(){
+ ivec2 p=ivec2(gl_FragCoord.xy);
+ vec3 col=vec3(0.);float tr=1.,op=0.;
+ vec4 r=texelFetch(uR0,p,0);
+ if(r.a>.5){col+=tr*emit(r,op);tr*=1.-op;
+  r=texelFetch(uR1,p,0);
+  if(r.a>.5){col+=tr*emit(r,op);tr*=1.-op;
+   r=texelFetch(uR2,p,0);
+   if(r.a>.5){col+=tr*emit(r,op);tr*=1.-op;}
+  }
+ }
+ col+=tr*texelFetch(uBG,p,0).rgb;
+ col=1.-exp(-col*1.2);col=pow(col,vec3(.92));col=max(col,vec3(.0078,.0118,.0392));
+ fc=vec4(col,1.);
+}`;
+let B2=null;
+function b2H(){return innerWidth>innerHeight?innerHeight:Math.min(innerHeight,340)}
+function b2Levels(){
+  const d=Math.max(1,devicePixelRatio||1),W=innerWidth,H=b2H(),gl=B2&&B2.gl;
+  const mt=Math.min(gl?gl.getParameter(gl.MAX_TEXTURE_SIZE):4096,8192);let cap=99;try{cap=+localStorage.getItem('bh:cap2')||99}catch(e){}
+  const raw=[1,1.5,2,2.5,3,d,1080/W,1440/W,2160/W].map(v=>Math.round(v*100)/100);
+  const L=[...new Set(raw)].filter(v=>v>=1&&v<=cap+.001&&v*W<=mt&&v*v*W*H<=5.3e6).sort((a,b)=>a-b);
+  return L.length?L:[1]
+}
+function b2Init(){
+  const c=$('bh');let gl=null;
+  try{gl=c.getContext('webgl2',{antialias:false,alpha:false,preserveDrawingBuffer:true})}catch(e){}
+  if(!gl)return null;
+  try{
+    if(!gl.getExtension('EXT_color_buffer_float'))throw new Error('no float render targets');
+    const mk=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
+    const vs=mk(gl.VERTEX_SHADER,'#version 300 es\nin vec2 a;void main(){gl_Position=vec4(a,0.,1.);}');
+    const prog=src=>{const p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,mk(gl.FRAGMENT_SHADER,src));gl.bindAttribLocation(p,0,'a');gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p};
+    const P1=prog(B2PRE),P2=prog(B2SHOW);
+    gl.bindVertexArray(gl.createVertexArray());gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+    gl.enable(gl.SCISSOR_TEST);
+    const U=(p,n)=>gl.getUniformLocation(p,n);
+    gl.useProgram(P2);['uR0','uR1','uR2','uBG'].forEach((n,i)=>gl.uniform1i(U(P2,n),i));
+    c.addEventListener('webglcontextlost',e=>{e.preventDefault();cancelAnimationFrame(bhRaf);try{const q=B2&&(B2.pend||B2.cur);localStorage.setItem('bh:cap2',String(Math.max(1,(q?q.scale:1)/1.5)))}catch(x){}B2=null;document.body.classList.add('nogl');const f=$('bhInfo');if(f)f.textContent='The phone ran out of graphics memory. Reopen the app and it will use a lower quality.'});
+    return {gl,P1,P2,u1:{s:U(P1,'uScale'),n:U(P1,'uNorm'),c:U(P1,'uCenter')},u2:{t:U(P2,'uTime')},cur:null,pend:null,L:[1],still:false}
+  }catch(e){window.bhError2=String(e);const n=document.createElement('canvas');n.id='bh';n.setAttribute('aria-hidden','true');c.replaceWith(n);return null}
+}
+function b2Free(P){if(P){P.T.forEach(t=>B2.gl.deleteTexture(t));B2.gl.deleteFramebuffer(P.f)}}
+function b2Build(s){
+  const g=B2.gl,W=innerWidth,H=b2H(),w=Math.max(64,Math.round(W*s)),h=Math.max(64,Math.round(H*s));
+  const mk=()=>{const t=g.createTexture();g.bindTexture(g.TEXTURE_2D,t);g.texStorage2D(g.TEXTURE_2D,1,g.RGBA16F,w,h);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MIN_FILTER,g.NEAREST);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MAG_FILTER,g.NEAREST);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_S,g.CLAMP_TO_EDGE);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_T,g.CLAMP_TO_EDGE);return t};
+  const T=[mk(),mk(),mk(),mk()],f=g.createFramebuffer();
+  g.bindFramebuffer(g.FRAMEBUFFER,f);T.forEach((t,i)=>g.framebufferTexture2D(g.FRAMEBUFFER,g.COLOR_ATTACHMENT0+i,g.TEXTURE_2D,t,0));
+  g.drawBuffers([0,1,2,3].map(i=>g.COLOR_ATTACHMENT0+i));
+  const ok=g.checkFramebufferStatus(g.FRAMEBUFFER)===g.FRAMEBUFFER_COMPLETE;g.bindFramebuffer(g.FRAMEBUFFER,null);
+  const P={w,h,T,f,i:0,scale:s,W,H};
+  if(!ok){b2Free(P);const L=B2.L,k=L.indexOf(s);if(k>0)return b2Build(L[k-1]);document.body.classList.add('nogl');return}
+  B2.pend=P
+}
+function b2Strips(k){
+  const g=B2.gl,P=B2.pend,N=24;if(!P)return;
+  g.bindFramebuffer(g.FRAMEBUFFER,P.f);g.viewport(0,0,P.w,P.h);g.useProgram(B2.P1);
+  g.uniform1f(B2.u1.s,P.w/P.W);g.uniform1f(B2.u1.n,Math.min(innerWidth,innerHeight));g.uniform2f(B2.u1.c,P.W/2,P.H-150);
+  for(let j=0;j<k&&P.i<N;j++,P.i++){const y0=Math.floor(P.h*P.i/N),y1=Math.floor(P.h*(P.i+1)/N);g.scissor(0,y0,P.w,y1-y0);g.drawArrays(g.TRIANGLES,0,3)}
+  g.bindFramebuffer(g.FRAMEBUFFER,null);
+  if(P.i>=N)b2Swap()
+}
+function b2Draw(t,i,N){
+  const g=B2.gl,P=B2.cur;if(!P)return;
+  g.bindFramebuffer(g.FRAMEBUFFER,null);g.useProgram(B2.P2);g.viewport(0,0,P.w,P.h);
+  P.T.forEach((tx,k)=>{g.activeTexture(g.TEXTURE0+k);g.bindTexture(g.TEXTURE_2D,tx)});
+  g.uniform1f(B2.u2.t,t);
+  const y0=Math.floor(P.h*i/N),y1=Math.floor(P.h*(i+1)/N);g.scissor(0,y0,P.w,y1-y0);g.drawArrays(g.TRIANGLES,0,3)
+}
+function b2Full(){const t=B2.still?10:(performance.now()-bhT0)/1000+10;for(let i=0;i<BHN;i++)b2Draw(t,i,BHN)}
+function b2Swap(){
+  const P=B2.pend,old=B2.cur,c=$('bh');B2.pend=null;B2.cur=P;B2.settle=45;
+  c.width=P.w;c.height=P.h;c.style.height=P.H+'px';c.classList.add('roi');
+  b2Full();c.classList.add('on');b2Free(old);
+  const f=$('bhInfo');if(f)f.textContent='Black hole resolution: '+P.w+' × '+P.h+' pixels ('+(P.w>=2100?'4K':P.w>=1400?'2K':P.w>=1000?'Full HD':'below Full HD')+').'
+}
+function b2Rebuild(s){
+  const P=B2.cur,W=innerWidth,H=b2H();
+  if(B2.pend){b2Free(B2.pend);B2.pend=null}
+  if(P&&Math.abs(P.scale-s)<.01&&P.W===W&&P.H===H){b2Full();return}
+  b2Build(s)
+}
+function b2Store(){try{localStorage.setItem('bh:q3',JSON.stringify({s:B2.L[bhC.lvl]}))}catch(e){}}
+function b2Adapt(dt){
+  const C=bhC;
+  if(B2.pend||B2.settle>0){if(!B2.pend)B2.settle--;C.dts=[];return}
+  C.dts.push(dt);if(C.dts.length>30)C.dts.shift();
+  if(C.n<60)C.vs=Math.max(5,Math.min(C.vs,dt));
+  if(C.cool>0){C.cool--;return}
+  if(C.dts.length<20)return;
+  const jank=C.dts.filter(d=>d>C.vs*1.5).length/C.dts.length,auto=(S.bhq||'auto')==='auto';
+  if(jank>.3){
+    C.dts=[];C.okFull=0;
+    if(C.per>1){C.per--;C.cool=20}
+    else if(auto&&C.lvl>0){C.lvl--;b2Rebuild(B2.L[C.lvl]);b2Store();C.cool=120}
+  }else if(jank<.08){
+    if(C.per<BHN){C.per++;C.cool=15}
+    else if(auto&&++C.okFull>=600&&C.lvl<C.nat){C.okFull=0;C.lvl++;b2Rebuild(B2.L[C.lvl]);b2Store();C.cool=120}
+  }
+}
+function b2Tick(now){
+  bhRaf=requestAnimationFrame(b2Tick);
+  const C=bhC,dt=now-C.last;C.last=now;
+  if(dt>150){C.cool=Math.max(C.cool,20);C.dts=[];return}
+  C.n++;if(C.n<4)return;
+  if(B2.pend){C.sp=C.sp||1;b2Strips(C.sp);C.sp=dt<C.vs*1.4?Math.min(C.sp+1,6):Math.max(1,C.sp-1)}
+  for(let k=0;k<C.per;k++){b2Draw((now-bhT0)/1000+10,C.band,BHN);C.band=(C.band+1)%BHN}
+  b2Adapt(dt)
+}
+function b2Apply(){
+  cancelAnimationFrame(bhRaf);bhRaf=0;document.body.classList.remove('nogl');
+  const calm=S.bh===false||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const L=b2Levels(),W=innerWidth,pick=v=>{let r=L[0];L.forEach(x=>{if(x<=v+.01)r=x});return r};B2.L=L;B2.still=calm;
+  const nat=pick(Math.max(1,devicePixelRatio||1)),q=S.bhq||'auto';let want=nat;
+  if(q==='low')want=pick(1);else if(q==='med')want=pick(1.5);else if(q==='high')want=pick(2);else if(q==='hd')want=pick(1080/W);else if(q==='2k')want=pick(1440/W);else if(q==='4k')want=pick(2160/W);
+  else if(q==='auto'&&!calm){try{const st=JSON.parse(localStorage.getItem('bh:q3')||'null');if(st&&st.s)want=Math.min(nat,pick(st.s))}catch(e){}}
+  bhC.lvl=L.indexOf(want);bhC.nat=L.indexOf(nat);
+  Object.assign(bhC,{per:2,dts:[],cool:60,okFull:0,n:0,last:performance.now(),band:0,sp:1});
+  b2Rebuild(want);
+  if(calm){let last=performance.now(),k=1;const st=now=>{if(B2&&B2.pend){const dt=now-last;last=now;k=dt<20?Math.min(k+1,6):Math.max(1,k-1);b2Strips(k);bhRaf=requestAnimationFrame(st)}};bhRaf=requestAnimationFrame(st)}
+  else bhRaf=requestAnimationFrame(b2Tick)
+}
+$('exp').onclick=()=>{
+  const d={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('cal:'))d[k]=localStorage.getItem(k)}}catch(e){}
+  try{const p=JSON.parse(d['cal:profile']||'{}');delete p.gkey;delete p.ghtoken;d['cal:profile']=JSON.stringify(p)}catch(e){}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d)],{type:'application/json'}));a.download='calorie-scan-backup-'+today()+'.json';document.body.append(a);a.click();a.remove();
+  $('cloud').textContent='Backup saved to your Downloads folder.'};
+$('imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  try{const d=JSON.parse(await f.text());Object.keys(d).filter(k=>k.startsWith('cal:')).forEach(k=>localStorage.setItem(k,d[k]));load();newDay();Q('[data-k]').forEach(el=>el.value=S[el.dataset.k]);save();calc();render();$('cloud').textContent='Backup restored.'}
+  catch(x){$('cloud').textContent='That file couldn’t be restored.'}
+  e.target.value=''};
+$('wlog').onclick=()=>{const v=+$('wnew').value,d=today();if(!(v>20&&v<400))return;S.wl=S.wl.filter(x=>x.d!==d).concat({d,w:v}).sort((a,b)=>a.d<b.d?-1:1).slice(-1000);S.w=v;$('wnew').value='';document.querySelector('[data-k="w"]').value=v;save();calc();render()};
+$('nudgeBtn').onclick=()=>{S.goal=(+S.goal||0)+(+$('nudgeBtn').dataset.adj||0);S.na=today();$('goal').value=S.goal;save();render()};
+$('favBtn').onclick=()=>{if(!pending)return;const k=Math.round(+$('rk').value)||0,q=pending.kcal?k/pending.kcal:1;S.fav=S.fav.filter(x=>x.name!==pending.name).concat({name:pending.name,kcal:k,p:pending.p*q,c:pending.c*q,f:pending.f*q,s:pending.s*q,fi:pending.fi*q});save();render();$('favBtn').textContent='★ Saved'};
+Q('.days button').forEach(b=>b.onclick=()=>{S.dt=b.dataset.d;save();render()});
+function sums(k){$('s-today').textContent=Math.round(k)+' of '+dayGoal()+' kcal';$('s-body').textContent=S.h>0&&S.w>0?'BMI '+$('bmi').textContent+' · '+$('bcat').textContent:'Stats, BMI and body scan';$('s-plan').textContent=$('sug').textContent!=='–'?'Suggested '+$('sug').textContent+' kcal a day':'Calories, protein and goal';if(!$('t-cal').hidden)dayShow(cs)}
+load();newDay();Q('[data-k]').forEach(el=>el.value=S[el.dataset.k]);calc();render();
+bhInit();
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
